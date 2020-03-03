@@ -37,8 +37,6 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_update(self, serializer):
-       
-        
         serializer.save()
       
 

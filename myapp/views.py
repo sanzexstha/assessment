@@ -8,7 +8,7 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework import generics
 from myapp.permissions import IsLoggedInUserOrAdmin, IsAdminUser 
 from rest_framework.views import APIView
-from .utils.exportcsv import export_to_csv
+# from .utils.exportcsv import export_to_csv
 import csv
 from django.http import HttpResponse
 
@@ -37,6 +37,8 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_update(self, serializer):
+       
+        
         serializer.save()
       
 
@@ -46,29 +48,26 @@ class UserCreateViewSet(generics.CreateAPIView):
     
 
 
-
-def get_users_data():
-    queryset = User.objects.only('first_name', 'last_name', 'username', 'email' )
-     
-
-    fields = ['first_name', 'last_name', 'username', 'email']
-    titles = ['first_name', 'first_name' , 'username','email' ]
-    file_name = 'users'
-    return queryset, fields, titles, file_name
+from django.http import HttpResponse
+import csv
+from rest_framework.decorators import api_view, permission_classes
 
 
-class UsersExportAsCSV(APIView):
-    def get(self, request):
-        users = get_users_data()
-        data = export_to_csv(queryset=users[0], fields=users[1], titles=users[2], file_name=users[3])
-        return data
- 
 
-def get_sample_data():
-        titles = ['first_name', 'first_name' , 'username','email' ]
-        file_name = 'sample'
-        return titles , file_name
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def export_users_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="users.csv"'
 
+    writer = csv.writer(response)
+    writer.writerow(['first_name', 'last_name', 'username' ])
+
+    users = User.objects.all().values_list('first_name', 'last_name', 'username' )
+    for user in users:
+        writer.writerow(user)
+
+    return response
 
 # Simple CSV Write Operation
 def csv_sample_write(request):
@@ -81,3 +80,26 @@ def csv_sample_write(request):
 
 
     return response
+
+
+# def get_users_data():
+#     queryset = User.objects.only('first_name', 'last_name', 'username', 'email' )
+     
+
+#     fields = ['first_name', 'last_name', 'username', 'email']
+#     titles = ['first_name', 'first_name' , 'username','email' ]
+#     file_name = 'users'
+#     return queryset, fields, titles, file_name
+
+
+# class UsersExportAsCSV(APIView):
+#     def get(self, request):
+#         users = get_users_data()
+#         data = export_to_csv(queryset=users[0], fields=users[1], titles=users[2], file_name=users[3])
+#         return data
+ 
+
+# def get_sample_data():
+#         titles = ['first_name', 'first_name' , 'username','email' ]
+#         file_name = 'sample'
+#         return titles , file_name

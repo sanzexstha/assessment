@@ -11,7 +11,7 @@ urlpatterns = [
    
     url(r'^', include(router.urls )),
     path('users/create', UserCreateViewSet.as_view()),
-    path('users-csv-export', UsersExportAsCSV.as_view()),
+    path('users-csv-export', export_users_csv, name='export-user' ),
     path('sample-csv-export/', csv_sample_write, name='sample'),
 
 ]

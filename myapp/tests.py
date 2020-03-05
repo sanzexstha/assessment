@@ -73,7 +73,8 @@ class UserViewSetTestCase(APITestCase):
                 reverse('user-detail', args=[self.customuser.id]),
                 data=data,
                 format='json'
-            )
+         )
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 #            
@@ -82,6 +83,19 @@ class UserViewSetTestCase(APITestCase):
         response = self.client.delete(reverse('user-detail', args=[self.customuser.id]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        
+class Testcalls(TestCase):
+
+    def test_export_csv(self):
+        self.admin = User.objects.create_user(username='sanjeev', password='sanjeev', is_staff=True)
+        self.admin.save() 
+        self.client = APIClient()
+        self.client.login(username='sanjeev', password='sanjeev') 
+        self.list_url = reverse('export-user')
+        response = self.client.get(self.list_url)
+        import ipdb
+        ipdb.set_trace()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
 
 

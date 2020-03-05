@@ -8,7 +8,11 @@ from django.contrib.auth.models import User
 from .utils.random_username import generate_random_username
 from django.contrib.auth.hashers import make_password
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth.validators import UnicodeUsernameValidator
+# from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
+
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -17,17 +21,14 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id','username','first_name', 'last_name','password']
         extra_kwargs = {
-            'password': {'write_only': True},          
+            'password': {'write_only': True}, 
           
         }
-
-    
-            
-      
-
+   
 
 class FileUploadSerializer(serializers.Serializer):
-    csv_input = serializers.FileField(use_url = True,allow_empty_file=False)
+    csv_input = serializers.FileField(validators=[FileExtensionValidator(allowed_extensions=['csv'])],
+                                         allow_empty_file=False)
 
     def create(self, validated_data):
         csv_input = validated_data.get("csv_input")
@@ -46,7 +47,7 @@ class FileUploadSerializer(serializers.Serializer):
                 'username': username,
                 'first_name': first_name,
                 'last_name': last_name,
-                'password': 'sanjeev23'
+                'password': User.objects.make_random_password(length=5)
             
             }
    
@@ -61,7 +62,7 @@ class FileUploadSerializer(serializers.Serializer):
             }
             current_address_serializer=AddressSerializer(data=current_address_data)
             current_address_serializer.is_valid(raise_exception=True)
-            # current_address_serializer.save()
+
 
             street=row.get('p_a_street')
             city=row.get('p_a_city')
@@ -83,9 +84,7 @@ class FileUploadSerializer(serializers.Serializer):
 
 
             customuser_data = {
-                'user' : 
-                   data,
-                
+                'user' : data,
                 'gender': gender,
                 'email' : email,
                 'dob' : dob,
@@ -121,20 +120,6 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = '__all__'
-        # extra_kwargs = {
-        #     'city': {
-        #         'blank': True,
-        #         'required': False
-        #     },
-        #     'province': {
-        #         'blank': True,
-        #         'required': False
-
-        #     },
-        #     'street': {
-        #         'blank': True,
-        #         'required': False
-        #     }
 
 
 
@@ -208,8 +193,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         instance.martial_status = validated_data.get('martial_status',instance.martial_status)
         instance.gender = validated_data.get('gender', instance.gender)
         instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
-        # import ipdb
-        # ipdb.set_trace()
         instance.save()
             
 
